@@ -1,3 +1,6 @@
+import { isEven } from "./utils";
+import { tassign } from 'tassign';
+
 describe('functions', () => {
 
     it('you cannot overload functions in javascript', () => {
@@ -114,10 +117,146 @@ describe('functions', () => {
 
 
     });
-    it('array methods as higher ordered functions', () => {
+    describe('array methods as higher ordered functions', () => {
+        const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
+
+        it('forEach allows you to visit eacn member ', () => {
+            numbers.forEach(e => console.log(e));
+        });
+        describe('mehtod that proced a new array', () => {
+            it('selecting specific elements of an array', () => {
+                const evens = numbers.filter(isEven);
+
+                expect(evens).toEqual([2, 4, 6, 8]);
+                expect(numbers).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            });
+            it('transforming an array from one thing to another', () => {
+                const double = numbers.map(n => n * 2);
+                expect(double).toEqual([2, 4, 6, 8, 10, 12, 14, 16, 18]);
+
+                const tostrings = numbers.map(n => n.toString());
+                expect(tostrings).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9'])
+            });
+            it('a practice', () => {
+
+                // Just the doubled odd numbers
+                const odds = numbers
+                    .filter(n => !isEven(n))
+                    .map(n => n * 2);
+                expect(odds).toEqual([2, 6, 10, 14, 18])
+            });
+
+            it('another practice', () => {
+                interface Vehicle {
+                    vin: string;
+                    makeAndModel: string;
+                    mileage: number;
+                }
+                const vehicles: Vehicle[] = [
+                    { vin: '9999', makeAndModel: 'Chevy Tahoe', mileage: 182000 },
+                    { vin: 'aka92', makeAndModel: 'Toyota Prius', mileage: 89999 },
+                    { vin: 'kduwi', makeAndModel: 'Ford Explorer', mileage: 99998 }
+                ];
+
+                // a low mileage vehicle is any vehicle with < 100_000 miles on it.
+                const lowMileageVehicles = vehicles  // [,,,] all the vehicles
+                    .filter(v => v.mileage < 100_000)  // [,,] just those vehicles with the right milage 
+                    .map(v => v.makeAndModel);
+
+                expect(lowMileageVehicles).toEqual(['Toyota Prius', 'Ford Explorer']);
+            });
+
+
+        });
+        describe('that return a single value', () => {
+            describe('checking the membership of an array', () => {
+                it('does every member meet a requirement', () => {
+                    expect(numbers.every(isEven)).toBe(false);
+                });
+                it('does any member of the array meet the requirments', () => {
+
+                    expect(numbers.some(isEven)).toBe(true);
+                });
+            });
+            describe('boil down an array of things to just one thing', () => {
+
+                it('reducing an array of numbers - easy mode', () => {
+
+                    const total = numbers.reduce((s, n) => s + n);
+
+
+                    expect(total).toBe(45);
+
+
+                    const total2 = numbers.reduce((s, n) => s + n, 100);
+
+                    expect(total2).toBe(145);
+                });
+
+
+
+                it('a bigger example', () => {
+
+                    interface Vehicle {
+                        vin: string;
+                        makeAndModel: string;
+                        mileage: number;
+                    }
+
+                    const vehicles: Vehicle[] = [
+                        { vin: '9999', makeAndModel: 'Chevy Tahoe', mileage: 182000 },
+                        { vin: 'aka92', makeAndModel: 'Toyota Prius', mileage: 89999 },
+                        { vin: 'kduwi', makeAndModel: 'Ford Explorer', mileage: 99998 }
+                    ];
+
+                    interface Result {
+                        highMileageMakeAndModel: string;
+                        highMileageMileage: number;
+                        lowMileageMakeAndModel: string;
+                        lowMileageMileage: number;
+                    }
+
+                    const seed: Result = {
+                        highMileageMakeAndModel: null,
+                        highMileageMileage: -1,
+                        lowMileageMakeAndModel: null,
+                        lowMileageMileage: 3_000_000
+                    }
+
+                    const answer = vehicles.reduce((s: Result, n: Vehicle) => {
+
+                        let result: Result = tassign(s);
+                        if (n.mileage < s.lowMileageMileage) {
+                            result.lowMileageMakeAndModel = n.makeAndModel;
+                            result.lowMileageMileage = n.mileage;
+                        }
+
+                        if (n.mileage > s.highMileageMileage) {
+                            result.highMileageMakeAndModel = n.makeAndModel;
+                            result.highMileageMileage = n.mileage;
+                        }
+
+                        console.log(result);
+
+                        return result;
+
+                    }, seed);
+
+                    const expectedResult: Result = {
+                        highMileageMakeAndModel: 'Chevy Tahoe',
+                        highMileageMileage: 182_000,
+                        lowMileageMakeAndModel: 'Toyota Prius',
+                        lowMileageMileage: 89_999
+                    };
+
+                    console.log(answer);
+
+                    expect(answer).toEqual(expectedResult);
+
+                });
+
+            });
+        });
     });
-});
-describe('array methods as higher order functions', () => {
-
 });
